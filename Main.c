@@ -11,7 +11,7 @@ void LoadHelloWorldRBGScene( volatile uint16* _vram ) {
 }
 
 int main(void) {
-	
+
 	REG_DISPLAY = 0x1000 | 0x0040;
 
 	REG_VIDEOMODE = 0x03; // Use video mode 3 (in BG2, a 16bpp bitmap in VRAM)
@@ -19,8 +19,11 @@ int main(void) {
 
 	LoadHelloWorldRBGScene( &REG_VRAM );
 
-	// Wait forever
-	while(1);
+	while(1) {
+		// REG_DISPLAY_VCOUNT - V-BLANK i.e. update AFTER screen has been fully drawn. V-DRAW i.e. draw
+		while( REG_DISPLAY_VCOUNT >= 160 ); // V-BLANK - 0 -> 227
+		while( REG_DISPLAY_VCOUNT < 160 ); // V-DRAW
+	}
 
 	return 0;
 }

@@ -18,10 +18,11 @@
 #define PAK_RAM 		0x0E000000
 
 // Registers
-#define REG_DISPLAY		(*((volatile uint32*)(IO)))
-#define REG_VIDEOMODE	(*((volatile uint32*)(IO + 0x0004)))
-#define REG_BGMODE		(*((volatile uint32*)(IO + 0x0008)))
-#define REG_VRAM		(*((volatile uint16*)(VRAM)))
+#define REG_DISPLAY			(*((volatile uint32*)(IO)))
+#define REG_DISPLAY_VCOUNT 	(*((volatile uint32 *)(IO + 0x0006)))
+#define REG_VIDEOMODE		(*((volatile uint32*)(IO + 0x0004)))
+#define REG_BGMODE			(*((volatile uint32*)(IO + 0x0008)))
+#define REG_VRAM			(*((volatile uint16*)(VRAM)))
 
 // Viewport
 #define HEIGHT 		160
