@@ -3,12 +3,8 @@
 #include "include/macros.h"
 #include "include/types.h"
 
-void LoadHelloWorldRBGScene( volatile uint16* _vram ) {
-	// y * max x + x = colour
-	_vram[HALF_HEIGHT * WIDTH + HALF_WIDTH - 5]	= RED;
-	_vram[HALF_HEIGHT * WIDTH + HALF_WIDTH]		= GREEN;
-	_vram[HALF_HEIGHT * WIDTH + HALF_WIDTH + 5]	= BLUE;
-}
+// forward decl
+void SetPosition( volatile obj_attributes* object, int x, int y);
 
 int main(void) {
 
@@ -16,9 +12,7 @@ int main(void) {
 
 	REG_VIDEOMODE = 0x03; // Use video mode 3 (in BG2, a 16bpp bitmap in VRAM)
 	REG_BGMODE = 0x04; // Enable BG2 (BG0 = 1, BG1 = 2, BG2 = 4, ...)
-
-	LoadHelloWorldRBGScene( &REG_VRAM );
-
+	
 	while(1) {
 		// REG_DISPLAY_VCOUNT - V-BLANK i.e. update AFTER screen has been fully drawn. V-DRAW i.e. draw
 		while( REG_DISPLAY_VCOUNT >= 160 ); // V-BLANK - 0 -> 227
@@ -26,4 +20,8 @@ int main(void) {
 	}
 
 	return 0;
+}
+
+void SetPosition( volatile obj_attributes* object, int x, int y) {
+
 }

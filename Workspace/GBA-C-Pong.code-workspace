@@ -4,5 +4,9 @@
 			"path": "C:\\Users\\navi\\gitrepos\\GBA\\GBA-C-Pong"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"files.associations": {
+			"types.h": "c"
+		}
+	}
 }
