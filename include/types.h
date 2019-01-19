@@ -10,10 +10,10 @@ typedef unsigned int	uint32;
 typedef uint16 rgb15;
 
 typedef struct obj_attributes {
-    uint16 attr0;
-    uint16 attr1;
-    uint16 attr2;
-    uint16 padding;
+	uint16 attr0;
+	uint16 attr1;
+	uint16 attr2;
+	uint16 padding;
 } __attribute__((packed, aligned(4))) obj_attributes;
 
 // colour palette storing 512 tiles (per block) storing 6 blocks in vram.

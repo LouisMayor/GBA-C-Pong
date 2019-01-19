@@ -3,15 +3,29 @@
 #include "include/macros.h"
 #include "include/types.h"
 #include "include/utility.h"
+#include "include/pong-types.h"
 
-// forward decl
-void SetPosition( volatile obj_attributes* object, int x, int y);
+volatile uint16* paddleTile;
+volatile uint16* ballTile;
 
-int main(void) {
-	
-	// Writing sprites in VRAM. Paddle and ball
-	volatile uint16* paddleTile = (uint16*)TILE_LAYOUT[4][1];
-	volatile uint16* ballTile = (uint16*)TILE_LAYOUT[4][5];
+volatile obj_attributes* paddleAttributes;
+volatile obj_attributes* ballAttributes;
+
+paddle playerPaddle;
+ball pongBall;
+
+int paddleMaxY;
+uint32 keyState;
+
+void SetPosition( volatile obj_attributes* object, int x, int y) {
+	object->attr0 = (object->attr0 & ~OBJ_MASK_ATTR0_Y) | (y & OBJ_MASK_ATTR0_Y);
+	object->attr1 = (object->attr1 & ~OBJ_MASK_ATTR1_X) | (x & OBJ_MASK_ATTR1_X);
+}
+
+void Setup(void) {
+// Writing sprites in VRAM. Paddle and ball
+	paddleTile	 = (uint16*)TILE_LAYOUT[4][1];
+	ballTile	 = (uint16*)TILE_LAYOUT[4][5];
 
 	// writing 4 pixels of colour into index 1
 	for( int i = 0; i < 4 * (sizeof(tile_4bpp) * 0.5); ++i ) {
@@ -28,41 +42,40 @@ int main(void) {
 	OBJ_PALETTE_LAYOUT[2] = RGB15(0x1F, 0x00, 0x1F);
 
 	// pass sprite data into object attribute memory
-	volatile obj_attributes* paddleAttributes = &OAM_ATTR_LAYOUT[0];
+	paddleAttributes = &OAM_ATTR_LAYOUT[0];
 	paddleAttributes->attr0 = 0x8000;
 	paddleAttributes->attr1 = 0x4000;
 	paddleAttributes->attr2 = 1;
 
-	volatile obj_attributes* ballAttributes = &OAM_ATTR_LAYOUT[1];
+	ballAttributes = &OAM_ATTR_LAYOUT[1];
 	ballAttributes->attr0 = 0;
 	ballAttributes->attr1 = 0;
 	ballAttributes->attr2 = 5;
 
-	const int paddleWidth = 8;
-	const int paddleHeight = 32;
+	playerPaddle.velocity	 = 2;
+	playerPaddle.positionX	 = 5;
+	playerPaddle.positionY	 = 96;
+	playerPaddle.dimensionX	 = 8;
+	playerPaddle.dimensionY	 = 32;
 
-	const int ballWidth = 8;
-	const int ballHeight = 8;
+	pongBall.velocityX	 = 2;
+	pongBall.velocityY	 = 1;
+	pongBall.positionX	 = 22;
+	pongBall.positionY	 = 96;
+	pongBall.dimensionX	 = 8;
+	pongBall.dimensionY	 = 8;
 
-	int paddleVelocity = 2;
-	int ballVelocityX = 2;
-	int ballVelocityY = 1;
+	paddleMaxY = HEIGHT - playerPaddle.dimensionY;
 
-	int paddleX = 5;
-	int paddleY = 96;
-
-	int ballX = 22;
-	int ballY = 96;
-
-	const int paddleMaxY = HEIGHT - paddleHeight;
-
-	SetPosition(paddleAttributes, paddleX, paddleY);
-	SetPosition(ballAttributes, ballX, ballY);
+	SetPosition(paddleAttributes, playerPaddle.positionX, playerPaddle.positionY);
+	SetPosition(ballAttributes, pongBall.positionX, pongBall.positionY);
 
 	REG_DISPLAY = 0x1000 | 0x0040;
-	
-	uint32 keyState = 0;
-	while(1) {
+
+	keyState = 0;
+}
+
+void GameLoop(void) {
 		// REG_DISPLAY_VCOUNT - V-BLANK i.e. update AFTER screen has been fully drawn. V-DRAW i.e. draw
 		//  0 -> 227
 		while( REG_DISPLAY_VCOUNT >= 160 ); // V-BLANK
@@ -73,20 +86,21 @@ int main(void) {
 
 		if ( keyState & KEY_UP || keyState & KEY_DOWN ) {
 			if( keyState & KEY_UP ) {
-				paddleY = ClampInt( paddleY - paddleVelocity, 0, paddleMaxY );
+				playerPaddle.positionY = ClampInt( playerPaddle.positionY - playerPaddle.velocity, 0, paddleMaxY );
 			}			
 			else if( keyState & KEY_DOWN ) {
-				paddleY = ClampInt( paddleY + paddleVelocity, 0, paddleMaxY );
+				playerPaddle.positionY = ClampInt( playerPaddle.positionY + playerPaddle.velocity, 0, paddleMaxY );
 			}
-			SetPosition(paddleAttributes, paddleX, paddleY);
+			SetPosition(paddleAttributes, playerPaddle.positionX, playerPaddle.positionY);
 		}
 
-		SetPosition(ballAttributes, ballX, ballY);
-	}
-	return 0;
+		SetPosition(ballAttributes, pongBall.positionX, pongBall.positionY);
 }
 
-void SetPosition( volatile obj_attributes* object, int x, int y) {
-	object->attr0 = (object->attr0 & ~OBJ_MASK_ATTR0_Y) | (y & OBJ_MASK_ATTR0_Y);
-	object->attr1 = (object->attr1 & ~OBJ_MASK_ATTR1_X) | (x & OBJ_MASK_ATTR1_X);
+int main(void) {
+	Setup();
+	while(1) {
+		GameLoop();
+	}
+	return 0;
 }
