@@ -18,6 +18,8 @@ ball pongBall;
 int paddleMaxY;
 uint32 keyState;
 
+bool pause = false;
+
 void SetPosition( volatile obj_attributes* object, int x, int y) {
 	object->attr0 = (object->attr0 & ~OBJ_MASK_ATTR0_Y) | (y & OBJ_MASK_ATTR0_Y);
 	object->attr1 = (object->attr1 & ~OBJ_MASK_ATTR1_X) | (x & OBJ_MASK_ATTR1_X);
@@ -79,14 +81,15 @@ void Setup(void) {
 }
 
 bool Update(void) {
-		// REG_DISPLAY_VCOUNT - V-BLANK i.e. update AFTER screen has been fully drawn. V-DRAW i.e. draw
-		//  0 -> 227
-		while( REG_DISPLAY_VCOUNT >= 160 ); // V-BLANK
-		while( REG_DISPLAY_VCOUNT < 160 ); // V-DRAW
+	// REG_DISPLAY_VCOUNT - V-BLANK i.e. update AFTER screen has been fully drawn. V-DRAW i.e. draw
+	//  0 -> 227
+	while( REG_DISPLAY_VCOUNT >= 160 ); // V-BLANK
+	while( REG_DISPLAY_VCOUNT < 160 ); // V-DRAW
 
-		// grab current key state
-		keyState = ~REG_INPUT & KEY_ANY;
+	// grab current key state
+	keyState = ~REG_INPUT & KEY_ANY;
 
+	if( !pause ) {
 		if ( keyState & KEY_UP || keyState & KEY_DOWN ) {
 			if( keyState & KEY_UP ) {
 				playerPaddle.positionY = ClampInt( playerPaddle.positionY - playerPaddle.velocity, 0, paddleMaxY );
@@ -96,22 +99,23 @@ bool Update(void) {
 			}
 			playerPaddle.dirty = true;
 		}
+	}
 
-		if ( keyState & KEY_START ){
-			return false;
-		} else {
-			return true;
-		}
+	if ( keyState & KEY_START ){
+		pause = !pause;
+	} else {
+		return true;
+	}
 }
 
 void Draw(void) {
 	if( playerPaddle.dirty ) {
 		SetPosition(paddleAttributes, playerPaddle.positionX, playerPaddle.positionY);
-		playerPaddle.dirty = !playerPaddle.dirty;
+		playerPaddle.dirty = false;
 	}
 	if( pongBall.dirty ) {
 		SetPosition(ballAttributes, pongBall.positionX, pongBall.positionY);
-		pongBall.dirty = !pongBall.dirty;
+		pongBall.dirty = false;
 	}
 }
 

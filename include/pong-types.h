@@ -14,7 +14,7 @@ typedef struct paddle {
 	int positionY;	// pixel y
 	int dimensionX;	// sprite x length
 	int dimensionY;	// sprite y length
-	uint8 dirty;
+	uint8 dirty;	// been updated, but not drawn
 } paddle;
 
 typedef struct ball {
@@ -24,7 +24,7 @@ typedef struct ball {
 	int positionY;	// pixel y
 	int dimensionX;	// sprite x length
 	int dimensionY;	// sprite y length
-	uint8 dirty;
+	uint8 dirty;	// been updated, but not drawn
 } ball;
 
 #endif
