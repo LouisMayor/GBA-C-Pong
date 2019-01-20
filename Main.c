@@ -1,5 +1,6 @@
 // includes
 #include <stdlib.h>
+#include <stdbool.h>
 #include "include/macros.h"
 #include "include/types.h"
 #include "include/utility.h"
@@ -23,7 +24,7 @@ void SetPosition( volatile obj_attributes* object, int x, int y) {
 }
 
 void Setup(void) {
-// Writing sprites in VRAM. Paddle and ball
+	// Writing sprites in VRAM. Paddle and ball
 	paddleTile	 = (uint16*)TILE_LAYOUT[4][1];
 	ballTile	 = (uint16*)TILE_LAYOUT[4][5];
 
@@ -57,6 +58,7 @@ void Setup(void) {
 	playerPaddle.positionY	 = 96;
 	playerPaddle.dimensionX	 = 8;
 	playerPaddle.dimensionY	 = 32;
+	playerPaddle.dirty = false;
 
 	pongBall.velocityX	 = 2;
 	pongBall.velocityY	 = 1;
@@ -64,6 +66,7 @@ void Setup(void) {
 	pongBall.positionY	 = 96;
 	pongBall.dimensionX	 = 8;
 	pongBall.dimensionY	 = 8;
+	pongBall.dirty = false;
 
 	paddleMaxY = HEIGHT - playerPaddle.dimensionY;
 
@@ -75,7 +78,7 @@ void Setup(void) {
 	keyState = 0;
 }
 
-void GameLoop(void) {
+bool Update(void) {
 		// REG_DISPLAY_VCOUNT - V-BLANK i.e. update AFTER screen has been fully drawn. V-DRAW i.e. draw
 		//  0 -> 227
 		while( REG_DISPLAY_VCOUNT >= 160 ); // V-BLANK
@@ -91,16 +94,39 @@ void GameLoop(void) {
 			else if( keyState & KEY_DOWN ) {
 				playerPaddle.positionY = ClampInt( playerPaddle.positionY + playerPaddle.velocity, 0, paddleMaxY );
 			}
-			SetPosition(paddleAttributes, playerPaddle.positionX, playerPaddle.positionY);
+			playerPaddle.dirty = true;
 		}
 
+		if ( keyState & KEY_START ){
+			return false;
+		} else {
+			return true;
+		}
+}
+
+void Draw(void) {
+	if( playerPaddle.dirty ) {
+		SetPosition(paddleAttributes, playerPaddle.positionX, playerPaddle.positionY);
+		playerPaddle.dirty = !playerPaddle.dirty;
+	}
+	if( pongBall.dirty ) {
 		SetPosition(ballAttributes, pongBall.positionX, pongBall.positionY);
+		pongBall.dirty = !pongBall.dirty;
+	}
+}
+
+void Clean(void) {
+	// All clean and tidy
 }
 
 int main(void) {
 	Setup();
 	while(1) {
-		GameLoop();
+		if (!Update()){
+			break;
+		}
+		Draw();
 	}
+	Clean();
 	return 0;
 }

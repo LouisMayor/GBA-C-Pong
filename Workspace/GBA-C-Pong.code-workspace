@@ -7,7 +7,9 @@
 	"settings": {
 		"files.associations": {
 			"types.h": "c",
-			"pong-types.h": "c"
+			"pong-types.h": "c",
+			"tonc.h": "c",
+			"tonc_tte.h": "c"
 		}
 	}
 }
