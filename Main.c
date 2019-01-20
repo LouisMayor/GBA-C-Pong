@@ -101,11 +101,11 @@ bool Update(void) {
 		}
 	}
 
-	if ( keyState & KEY_START ){
+	if ( keyState & KEY_START ) {
 		pause = !pause;
-	} else {
-		return true;
 	}
+
+	return true;
 }
 
 void Draw(void) {
