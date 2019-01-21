@@ -1,3 +1,8 @@
+/* SOF - APP */
+
+#ifndef APP_HEADER
+#define APP_HEADER
+
 // includes
 #include <stdlib.h>
 #include <stdbool.h>
@@ -19,22 +24,22 @@ typedef struct Pong {
 	int paddleMaxY;
 } Pong;
 
-void SetPosition( volatile obj_attributes* object, int x, int y) {
-	object->attr0 = (object->attr0 & ~OBJ_MASK_ATTR0_Y) | (y & OBJ_MASK_ATTR0_Y);
-	object->attr1 = (object->attr1 & ~OBJ_MASK_ATTR1_X) | (x & OBJ_MASK_ATTR1_X);
-}
-
 typedef struct App {
 	Pong pong;
 	uint32 keyState;
 	bool pause;
 } App;
 
+void SetPosition( volatile obj_attributes* object, int x, int y) {
+	object->attr0 = (object->attr0 & ~OBJ_MASK_ATTR0_Y) | (y & OBJ_MASK_ATTR0_Y);
+	object->attr1 = (object->attr1 & ~OBJ_MASK_ATTR1_X) | (x & OBJ_MASK_ATTR1_X);
+}
+
 void Setup(App* app, Pong* pong, uint32* keyState) {
 	app->pause = false;
 
 	// Writing sprites in VRAM. Paddle and ball
-	pong->paddleTile	 = (uint16*)TILE_LAYOUT[4][1];
+	pong->paddleTile = (uint16*)TILE_LAYOUT[4][1];
 	pong->ballTile	 = (uint16*)TILE_LAYOUT[4][5];
 
 	// writing 4 pixels of colour into index 1
@@ -63,18 +68,18 @@ void Setup(App* app, Pong* pong, uint32* keyState) {
 	pong->ballAttributes->attr2 = 5;
 
 	pong->playerPaddle.velocity	 = 2;
-	pong->playerPaddle.positionX	 = 5;
-	pong->playerPaddle.positionY	 = 96;
-	pong->playerPaddle.dimensionX	 = 8;
-	pong->playerPaddle.dimensionY	 = 32;
+	pong->playerPaddle.positionX = 5;
+	pong->playerPaddle.positionY = 96;
+	pong->playerPaddle.dimensionX = 8;
+	pong->playerPaddle.dimensionY = 32;
 	pong->playerPaddle.dirty = false;
 
-	pong->pongBall.velocityX	 = 2;
-	pong->pongBall.velocityY	 = 1;
-	pong->pongBall.positionX	 = 22;
-	pong->pongBall.positionY	 = 96;
-	pong->pongBall.dimensionX	 = 8;
-	pong->pongBall.dimensionY	 = 8;
+	pong->pongBall.velocityX = 2;
+	pong->pongBall.velocityY = 1;
+	pong->pongBall.positionX = 22;
+	pong->pongBall.positionY = 96;
+	pong->pongBall.dimensionX = 8;
+	pong->pongBall.dimensionY = 8;
 	pong->pongBall.dirty = false;
 
 	pong->paddleMaxY = HEIGHT - pong->playerPaddle.dimensionY;
@@ -85,7 +90,7 @@ void Setup(App* app, Pong* pong, uint32* keyState) {
 	REG_DISPLAY = 0x1000 | 0x0040;
 
 	keyState = 0;
-	}
+}
 
 bool Update(Pong* pong, uint32* keyState, bool* pause) {
 	// REG_DISPLAY_VCOUNT - V-BLANK i.e. update AFTER screen has been fully drawn. V-DRAW i.e. draw
@@ -124,3 +129,7 @@ void Draw(Pong* pong) {
 void Clean(void) {
 	// All clean and tidy
 }
+
+#endif
+
+/* EOF - APP */
