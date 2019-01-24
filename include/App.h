@@ -22,6 +22,8 @@ typedef struct Pong {
 	ball pongBall;
 
 	int paddleMaxY;
+	int ballMaxX;
+	int ballMaxY;
 } Pong;
 
 typedef struct App {
@@ -83,6 +85,8 @@ void Setup(App* app, Pong* pong, uint32* keyState) {
 	pong->pongBall.dirty = false;
 
 	pong->paddleMaxY = HEIGHT - pong->playerPaddle.dimensionY;
+	pong->ballMaxX = WIDTH - pong->pongBall.dimensionX;
+	pong->ballMaxY = HEIGHT - pong->pongBall.dimensionY;
 
 	SetPosition(pong->paddleAttributes, pong->playerPaddle.positionX, pong->playerPaddle.positionY);
 	SetPosition(pong->ballAttributes, pong->pongBall.positionX, pong->pongBall.positionY);
@@ -100,6 +104,25 @@ bool Update(Pong* pong, uint32* keyState, bool* pause) {
 	// grab current key state
 	*keyState = ~REG_INPUT & KEY_ANY;
 	if( !(*pause) ) {
+		if( pong->pongBall.positionX >= pong->playerPaddle.positionX &&
+			pong->pongBall.positionX <= pong->playerPaddle.positionX + pong->playerPaddle.dimensionX &&
+			pong->pongBall.positionY >= pong->playerPaddle.positionY &&
+			pong->pongBall.positionY <= pong->playerPaddle.positionY + pong->playerPaddle.dimensionY ) {
+			pong->pongBall.positionX = pong->playerPaddle.positionX + pong->playerPaddle.dimensionX;
+			pong->pongBall.velocityX = -pong->pongBall.velocityX;
+		} else {
+			if( pong->pongBall.positionX == 0 || pong->pongBall.positionX == pong->ballMaxX ) {
+				pong->pongBall.velocityX = -pong->pongBall.velocityX;
+			}
+			if( pong->pongBall.positionY == 0 || pong->pongBall.positionY == pong->ballMaxY ){
+				pong->pongBall.velocityY = -pong->pongBall.velocityY;
+			}
+		}
+		pong->pongBall.positionX = ClampInt( pong->pongBall.positionX + pong->pongBall.velocityX, 0, pong->ballMaxX );
+		pong->pongBall.positionY = ClampInt( pong->pongBall.positionY + pong->pongBall.velocityY, 0, pong->ballMaxY );
+
+		pong->pongBall.dirty = true;
+
 		if ( *keyState & KEY_UP || *keyState & KEY_DOWN ) {
 			if( *keyState & KEY_UP ) {
 				pong->playerPaddle.positionY = ClampInt( pong->playerPaddle.positionY - pong->playerPaddle.velocity, 0, pong->paddleMaxY );
