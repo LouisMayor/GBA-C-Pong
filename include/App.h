@@ -96,6 +96,18 @@ void Setup(App* app, Pong* pong, uint32* keyState) {
 	keyState = 0;
 }
 
+// broken, doesn't respond and freezes up.
+bool PaddleBallCollision( paddle playerPaddle, ball pongBall ) {
+	return (pongBall.positionX >= playerPaddle.positionX &&
+	 		pongBall.positionX <= playerPaddle.positionX + playerPaddle.dimensionX &&
+	  		pongBall.positionY >= playerPaddle.positionY &&
+	   		pongBall.positionY <= playerPaddle.positionY + playerPaddle.dimensionY);
+}
+
+bool BallWallCollision( int pos, int wallLimit ) {
+	return ( pos == 0 || pos == wallLimit );
+}
+
 bool Update(Pong* pong, uint32* keyState, bool* pause) {
 	// REG_DISPLAY_VCOUNT - V-BLANK i.e. update AFTER screen has been fully drawn. V-DRAW i.e. draw
 	//  0 -> 227
@@ -111,10 +123,10 @@ bool Update(Pong* pong, uint32* keyState, bool* pause) {
 			pong->pongBall.positionX = pong->playerPaddle.positionX + pong->playerPaddle.dimensionX;
 			pong->pongBall.velocityX = -pong->pongBall.velocityX;
 		} else {
-			if( pong->pongBall.positionX == 0 || pong->pongBall.positionX == pong->ballMaxX ) {
+			if( BallWallCollision( pong->pongBall.positionX, pong->ballMaxX ) ) {
 				pong->pongBall.velocityX = -pong->pongBall.velocityX;
 			}
-			if( pong->pongBall.positionY == 0 || pong->pongBall.positionY == pong->ballMaxY ){
+			if( BallWallCollision( pong->pongBall.positionY, pong->ballMaxY ) ){
 				pong->pongBall.velocityY = -pong->pongBall.velocityY;
 			}
 		}
